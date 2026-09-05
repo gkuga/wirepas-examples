@@ -77,11 +77,7 @@ def on_message(client, userdata, msg):
     response = wmm.SendDataResponse(
         request.req_id, GW_ID, wmm.GatewayResultCode.GW_RES_OK, SINK_ID
     )
-    client.publish(
-        send_data_response_topic(GW_ID, SINK_ID, request.req_id),
-        response.payload,
-        qos=1,
-    )
+    client.publish(send_data_response_topic(GW_ID, SINK_ID), response.payload, qos=1)
 
 
 def publish_received_data(client: mqtt.Client, counter: int) -> None:

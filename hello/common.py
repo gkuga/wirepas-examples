@@ -6,7 +6,7 @@ transport service publishes to MQTT:
     gw-event/status/<gw_id>
     gw-event/received_data/<gw_id>/<sink_id>/<network_address>/<src_ep>/<dst_ep>
     gw-request/send_data/<gw_id>/<sink_id>
-    gw-response/send_data/<gw_id>/<sink_id>/<req_id>
+    gw-response/send_data/<gw_id>/<sink_id>
 """
 
 import os
@@ -48,7 +48,7 @@ def send_data_request_topic(gw_id: str = "+", sink_id: str = "+") -> str:
     return f"gw-request/send_data/{gw_id}/{sink_id}"
 
 
-def send_data_response_topic(
-    gw_id: str = "+", sink_id: str = "+", req_id: int | str = "+"
-) -> str:
-    return f"gw-response/send_data/{gw_id}/{sink_id}/{req_id}"
+def send_data_response_topic(gw_id: str = "+", sink_id: str = "+") -> str:
+    # No req_id in the topic: a response is matched to its request by the
+    # req_id carried inside the protobuf payload.
+    return f"gw-response/send_data/{gw_id}/{sink_id}"

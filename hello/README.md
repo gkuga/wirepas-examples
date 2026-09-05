@@ -71,7 +71,7 @@ Stop the broker with `docker compose down`.
 | gateway → backend | `gw-event/status/<gw_id>` | `StatusEvent` — published **retained**, so a backend that connects later immediately learns the gateway exists. The MQTT last will publishes `OFFLINE` if the gateway dies. |
 | gateway → backend | `gw-event/received_data/<gw_id>/<sink_id>/<network_address>/<src_ep>/<dst_ep>` | `ReceivedDataEvent` — an uplink packet from a mesh node, every 5 s here. |
 | backend → gateway | `gw-request/send_data/<gw_id>/<sink_id>` | `SendDataRequest` — a downlink packet for a node. `app.py` sends one as soon as it sees a gateway go online. |
-| gateway → backend | `gw-response/send_data/<gw_id>/<sink_id>/<req_id>` | `SendDataResponse` — the gateway accepted the request (it says nothing about the packet reaching the node). |
+| gateway → backend | `gw-response/send_data/<gw_id>/<sink_id>` | `SendDataResponse` — the gateway accepted the request (it says nothing about the packet reaching the node). |
 
 Details worth noticing:
 
@@ -79,6 +79,9 @@ Details worth noticing:
   numbers. An application picks a pair and both ends agree on what the payload
   bytes mean; the payload itself is opaque to the stack.
 - **Addresses**: `0` is the sink, so `dst=0` on an uplink means "to the sink".
+- **`req_id` is not in the topic.** A response carries the request's `req_id`
+  inside its payload, so a backend with several requests in flight correlates
+  them by decoding, not by subscribing to a narrower topic.
 - **Topic wildcards** are how a backend discovers things: `app.py` subscribes
   with `+` in every position, so it works with any number of gateways and
   sinks without configuration.
