@@ -1,0 +1,9 @@
+[project]
+name = "dbus-hello"
+version = "0.1.0"
+description = "Fake Wirepas sink service on D-Bus, running the real transport service on top"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dbus-fast>=5.0.22",
+]

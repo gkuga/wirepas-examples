@@ -1,0 +1,60 @@
+name: wirepas-dbus-hello
+
+volumes:
+  dbus-socket:
+
+services:
+  # The D-Bus system bus every component connects to. On a real gateway this
+  # is just the host's system bus.
+  dbus:
+    container_name: wirepas-dbus
+    build: ./dbus
+    volumes:
+      - type: volume
+        source: dbus-socket
+        target: /var/run/dbus
+
+  # Our fake sink service. On a real gateway this is the C sink service
+  # driving a USB dongle over UART.
+  sink-mock:
+    container_name: wirepas-sink-mock
+    build: .
+    depends_on:
+      - dbus
+    environment:
+      DBUS_SYSTEM_BUS_ADDRESS: unix:path=/var/run/dbus/system_bus_socket
+      SINK_ID: sink0
+    volumes:
+      - type: volume
+        source: dbus-socket
+        target: /var/run/dbus
+
+  # The real Wirepas transport service, unmodified, from the official image.
+  transport:
+    container_name: wirepas-transport
+    image: wirepas/gateway_transport_service:v1.6.2
+    depends_on:
+      - dbus
+      - mosquitto
+    environment:
+      WM_GW_ID: gw-hello
+      WM_GW_MODEL: dbus-hello
+      WM_GW_VERSION: "1"
+      WM_SERVICES_MQTT_HOSTNAME: mosquitto
+      WM_SERVICES_MQTT_PORT: "1883"
+      WM_SERVICES_MQTT_FORCE_UNSECURE: "true"
+    volumes:
+      - type: volume
+        source: dbus-socket
+        target: /var/run/dbus
+
+  mosquitto:
+    container_name: wirepas-dbus-hello-mosquitto
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - type: bind
+        source: ./mosquitto/mosquitto.conf
+        target: /mosquitto/config/mosquitto.conf
+        read_only: true
