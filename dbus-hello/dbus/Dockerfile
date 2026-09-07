@@ -1,6 +1,8 @@
 FROM alpine:3.23
 
-RUN apk add --no-cache dbus
+# glib is only for gdbus, the nicest way to inspect the bus by hand;
+# dbus-monitor and dbus-send come with dbus itself.
+RUN apk add --no-cache dbus glib
 
 # dbus-daemon resolves each client's UID to a user name to match it against the
 # policy below. A client whose UID does not exist here is refused, so this user
